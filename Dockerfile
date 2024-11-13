@@ -1,5 +1,5 @@
  # syntax = docker/dockerfile
-FROM python:3.11-slim-bookworm as python-base-image
+FROM python:3.10-slim-bookworm as python-base-image
 
 ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1 \
@@ -17,9 +17,6 @@ ENV VIRTUAL_ENV=$work_dir/.venv \
 
 RUN apt-get update && apt-get upgrade -y
 
-# Building cryptography on armv7 is a pain, thank god for piwheels
-RUN pip config --global set global.extra-index-url https://www.piwheels.org/simple
-
 # Install poetry
 RUN apt-get install -y --no-install-recommends curl && \
     curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python get-pip.py && \
@@ -31,14 +28,6 @@ RUN apt-get install -y --no-install-recommends curl && \
 WORKDIR $work_dir
 
 FROM python-base-image as build-env
-
-# Install Open3D system dependencies and pip
-RUN apt-get update && apt-get install --no-install-recommends -y \
-    libegl1 \
-    libgl1 \
-    libgomp1 \
-    python3-pip \
-    && rm -rf /var/lib/apt/lists/*
 
 # copy in code
 COPY poetry.lock pyproject.toml README.md $work_dir/
