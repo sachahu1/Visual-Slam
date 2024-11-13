@@ -6,7 +6,6 @@ from typing import Tuple, Any, Optional
 
 import cv2
 import numpy as np
-import open3d as o3d
 
 @dataclass
 class Frame:
@@ -32,7 +31,8 @@ class VisualSlam:
     else:
       self._intrinsic_matrix = intrinsic_matrix
 
-    self.point_cloud = o3d.geometry.PointCloud()
+    # self.point_cloud = o3d.geometry.PointCloud()
+    self.points = None
     self._previous = None
 
   @property
@@ -111,11 +111,12 @@ class VisualSlam:
     return np.array(mapp_pts)
 
   def add_points(self, points: np.ndarray):
-    if len(self.point_cloud.points) == 0:
-      self.point_cloud.points = o3d.utility.Vector3dVector(points[:, :3])
+    if self.points is None:
+      self.points = points[:, :3]
     else:
-      new_points = o3d.utility.Vector3dVector(points[:, :3])
-      self.point_cloud.points.extend(new_points)
+      self.points = np.concatenate([self.point_cloud.points, points[:, :3]], axis=0)
+      # new_points = o3d.utility.Vector3dVector(points[:, :3])
+      # self.point_cloud.points.extend(new_points)
 
   def run(self):
     camera = cv2.VideoCapture(0)
@@ -176,9 +177,11 @@ class VisualSlam:
     camera.release()
     cv2.destroyAllWindows()
 
-    o3d.visualization.draw(
-      [self.point_cloud],
-    )
-    o3d.io.write_point_cloud(
-      "points_colored_structurev2.ply", self.point_cloud
-    )
+    np.savetxt("poits.txt", self.points)
+
+    # o3d.visualization.draw(
+    #   [self.point_cloud],
+    # )
+    # o3d.io.write_point_cloud(
+    #   "points_colored_structurev2.ply", self.point_cloud
+    # )
