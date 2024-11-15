@@ -8,6 +8,7 @@ import numpy as np
 def capture_image(out_path: pathlib.Path):
   # Open the default camera
   cam = cv2.VideoCapture(0)
+  print(cam.isOpened())
 
   i = 0
   while True:
