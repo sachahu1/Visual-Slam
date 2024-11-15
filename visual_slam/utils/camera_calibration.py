@@ -1,20 +1,51 @@
 import pathlib
 import shutil
+from enum import Enum
 
 import cv2
 import numpy as np
 
+class CameraType(str, Enum):
+  PI_CAMERA = "PI_CAMERA"
+  STANDARD_CAMERA = "STANDARD_CAMERA"
+
+class Camera(object):
+  def __init__(self):
+    self._camera_type = CameraType.STANDARD_CAMERA
+    self.camera = self._get_camera()
+
+  def _get_camera(self):
+    try:
+      from picamera2 import Picamera2
+      cam = Picamera2()
+      cam.start()
+      self.camera_type = CameraType.PI_CAMERA
+    except ImportError:
+      cam = cv2.VideoCapture(0)
+      self.camera_type = CameraType.STANDARD_CAMERA
+
+    return cam
+
+  def read(self):
+    if self.camera_type == CameraType.PI_CAMERA:
+      return True, self.camera.capture_array()
+    else:
+      return self.camera.read()
+
+  def release(self):
+    if self.camera_type == CameraType.PI_CAMERA:
+      self.camera.stop()
+    else:
+      self.camera.release()
+
 
 def capture_image(out_path: pathlib.Path):
   # Open the default camera
-  cam = cv2.VideoCapture(0)
+  cam = Camera()
 
   i = 0
   while True:
     ret, frame = cam.read()
-
-    # Display the captured frame
-    cv2.imshow("Camera", frame)
 
     # Write the frame to the output file
     cv2.imwrite((out_path / f"{i}.png").as_posix(), frame)

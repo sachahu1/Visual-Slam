@@ -17,6 +17,17 @@ ENV VIRTUAL_ENV=$work_dir/.venv \
 
 RUN apt-get update && apt-get upgrade -y
 
+
+RUN apt-get install -y --no-install-recommends gnupg
+
+RUN echo "deb http://archive.raspberrypi.org/debian/ bookworm main" > /etc/apt/sources.list.d/raspi.list \
+  && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 82B129927FA3303E
+
+RUN apt-get update && apt-get upgrade -y
+
+# Install python3-picamera2
+RUN apt-get install -y --no-install-recommends python3-picamera2
+
 # Install poetry
 RUN apt-get install -y --no-install-recommends curl && \
     curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python get-pip.py && \
