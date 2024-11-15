@@ -18,6 +18,10 @@ ENV VIRTUAL_ENV=$work_dir/.venv \
 RUN apt-get update && apt-get upgrade -y
 
 # Install poetry
+RUN apt-get install -y --no-install-recommends python3-picamera2 && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install poetry
 RUN apt-get install -y --no-install-recommends curl && \
     curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python get-pip.py && \
     curl -sSL https://install.python-poetry.org | python3 - && \
